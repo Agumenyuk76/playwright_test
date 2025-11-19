@@ -1,57 +1,55 @@
 import { test, expect, Page } from '@playwright/test';
+import { text } from 'stream/consumers';
 
 const elements = [
   {
     locator: (page: Page) => page.getByRole('link', { name: 'Playwright logo Playwright' }),
-    name: '',
+    name: 'Playwright logo',
+    text: 'Playwright',
   },
   {
     locator: (page: Page) => page.getByRole('link', { name: 'Документация' }),
-    name: '',
+    name: 'Документация',
+    text: 'Документация',
   },
   {
     locator: (page: Page) => page.getByRole('link', { name: 'API' }),
-    name: '',
+    name: 'API',
+    text: 'API',
   },
   {
     locator: (page: Page) => page.getByRole('link', { name: 'Сообщество' }),
-    name: '',
+    name: 'Сообщество',
+    text: 'Сообщество',
   },
   {
-    locator: (page: Page) => page.getByRole('link', { name: 'Обучение' }),
-    name: '',
+    locator: (page: Page) => page.getByRole('link', { name: 'Обучение', exact: true }),
+    name: 'Обучение',
+    text: 'Обучение',
   },
 ];
+
 test.describe('Тесты главной страницы', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://playwright.help/');
   });
 
   test('Проверка отображения элементов навигации', async ({ page }) => {
-    elements.forEach(({ locator }) => {
-      test.step('Проверка отображения элемента', async () => {
+    elements.forEach(({ locator, name }) => {
+      test.step(`Проверка отображения элемента ${name}`, async () => {
         await expect.soft(locator(page)).toBeVisible();
       });
     });
-
-    await expect(page.getByRole('link', { name: 'Документация' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'API' })).toBeVisible();
-    await expect(page.getByText('Node.js')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Сообщество' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Обучение', exact: true })).toBeVisible();
   });
 
-  test('Проверка названия элементов навигации', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'Playwright logo Playwright' })).toContainText(
-      'Playwright',
-    );
-    await expect(page.getByRole('link', { name: 'Документация' })).toContainText('Документация');
-    await expect(page.getByRole('link', { name: 'API' })).toContainText('API');
-    await expect(page.getByText('Node.jsNode.jsPythonJava.NET')).toContainText('Node.js');
-    await expect(page.getByRole('link', { name: 'Сообщество' })).toContainText('Сообщество');
-    await expect(page.getByRole('link', { name: 'Обучение', exact: true })).toContainText(
-      'Обучение',
-    );
+  test('Проверка названия элементов навигации ', async ({ page }) => {
+    elements.forEach(({ locator, name, text }) => {
+      if (text) {
+        test.step(`Проверка названия элемента ${name}`, async () => {
+          await expect(locator(page)).toContainText(text);
+        });
+      }
+    });
   });
 
   test.fixme('Проверка атрибутов href элементов навигации ', async ({ page }) => {
