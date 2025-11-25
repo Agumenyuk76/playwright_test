@@ -1,37 +1,22 @@
 import { Page, Locator } from '@playwright/test';
 
-export class DaDp02LoginPage {
+export class LoginPage {
   constructor(private page: Page) {}
 
-  get loginInput(): Locator {
-    return this.page.locator('#login');
+  readonly usernameInput: Locator = this.page.getByRole('textbox', { name: 'Username or email' });
+  readonly passwordInput: Locator = this.page.getByRole('textbox', { name: 'Password' });
+  readonly signInButton: Locator = this.page.getByRole('button', { name: 'Sign In' });
+
+  async open() {
+    await this.page.goto('https://da-dp02-ws-prjm-ift-1.apps.dap.devpub-02.solution.sbt/erp/main');
   }
 
-  get passwordInput(): Locator {
-    return this.page.locator('#password');
-  }
-
-  get submitButton(): Locator {
-    return this.page.locator('#submit-login');
-  }
-
-  get companyButton(): Locator {
-    return this.page.getByText('Sber');
-  }
-
-  async waitForLoginInput() {
-    await this.loginInput.waitFor({ state: 'visible' });
-  }
-
-  async fillLogin(login: string) {
-    await this.loginInput.fill(login);
-  }
-
-  async fillPassword(password: string) {
+  async fillCredentials(username: string, password: string) {
+    await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
   }
 
   async submit() {
-    await this.submitButton.click();
+    await this.signInButton.click();
   }
 }

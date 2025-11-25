@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "@pages/*": ["tests/pages/*"],
+      "@steps/*": ["tests/steps/*"],
+      "@flows/*": ["tests/flows/*"],
+      "@models/*": ["tests/models/*"]
+    }
+  },
+  "include": ["tests/**/*.ts"],
+  "exclude": ["node_modules"]
+}
