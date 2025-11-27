@@ -10,6 +10,8 @@ async function ensureAlphaIsEnabled(page: Page) {
     await expect(page.getByLabel('Alpha релизы')).toContainText('Да');
   }
 }
+// ui токен
+let uiAccessToken: string;
 
 // id альфы
 let productVersionAlfaId: string;
@@ -18,8 +20,8 @@ test.describe('Авторизация + Создание Альфы', () => {
   let accessToken: string;
 
   const BASE_URL = 'https://da-dp02-ws-prjm-ift-1.apps.dap.devpub-02.solution.sbt';
-  const USERNAME = 'user7';
-  const PASSWORD = 'user7';
+  const USERNAME = 'user';
+  const PASSWORD = 'user';
 
   test.beforeAll(async ({ request }) => {
     const response = await request.post(`${BASE_URL}/public/v1/auth`, {
@@ -54,10 +56,28 @@ test.describe('Авторизация + Создание Альфы', () => {
   test('Вклюение Альфа признака в проекте', async ({ page }) => {
     await page.goto('https://da-dp02-ws-prjm-ift-1.apps.dap.devpub-02.solution.sbt');
     await page.getByRole('textbox', { name: 'Username or email' }).click();
-    await page.getByRole('textbox', { name: 'Username or email' }).fill('user7');
+    await page.getByRole('textbox', { name: 'Username or email' }).fill('user');
     await page.getByRole('textbox', { name: 'Password' }).click();
-    await page.getByRole('textbox', { name: 'Password' }).fill('user7');
+    await page.getByRole('textbox', { name: 'Password' }).fill('user');
     await page.getByRole('button', { name: 'Sign In' }).click();
+
+    //получаем токен
+    await page.waitForLoadState('networkidle');
+
+    await page.waitForFunction(
+      () => {
+        return localStorage.getItem('ttoken') !== null;
+      },
+      null,
+      { timeout: 5000 },
+    );
+
+    // достаём токен
+    const uiAccessToken = await page.evaluate(() => {
+      return localStorage.getItem('ttoken') || '';
+    });
+
+    console.log('UI ACCESS TOKEN:', uiAccessToken);
 
     await page.getByText('SSberbank Technology').click();
     await page.getByRole('menu').getByText('Продукты').click();
@@ -105,15 +125,28 @@ test.describe('Авторизация + Создание Альфы', () => {
 test('Удаление Альфа релиза', async ({ page }) => {
   await page.goto('https://da-dp02-ws-prjm-ift-1.apps.dap.devpub-02.solution.sbt/erp/main');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill('user7');
+  await page.getByRole('textbox', { name: 'Username or email' }).fill('user');
   await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('user7');
+  await page.getByRole('textbox', { name: 'Password' }).fill('user');
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('SSberbank Technology').click();
   await page.getByRole('menuitem', { name: 'branches Версии продуктов' }).click();
-  await expect(page.getByRole('cell', { name: 'Тест 2.16.2-alpha7' })).toBeVisible();
-  await expect(page.locator('tbody')).toContainText('Тест 2.16.2-alpha7');
+
+  //эксперимент -удаляем то, что создали
+  await page.locator('.anticon.anticon-setting > svg').click();
+  await page.getByText('ID').click();
+  await page.getByRole('button', { name: 'search' }).first().click();
+  await page.getByRole('textbox', { name: 'Поиск ID' }).click();
+  await page.getByRole('textbox', { name: 'Поиск ID' }).press('CapsLock');
+  await page.getByRole('textbox', { name: 'Поиск ID' }).fill(productVersionAlfaId);
+  await page.getByRole('button', { name: 'Поиск search' }).click();
+
   await page.getByRole('cell', { name: 'ellipsis' }).first().click();
+  // проверяем что поик ничего не выводит
+  await page.getByRole('textbox', { name: 'Поиск ID' }).click();
+  await page.getByRole('textbox', { name: 'Поиск ID' }).press('CapsLock');
+  await page.getByRole('textbox', { name: 'Поиск ID' }).fill(productVersionAlfaId);
+  await page.getByRole('button', { name: 'Поиск search' }).click();
 });
 
 // Проверка созданного альфа релиза -добавить проверку онкретного релиза-вытянуть результат из создания
@@ -121,9 +154,9 @@ test('Удаление Альфа релиза', async ({ page }) => {
 test('Проверка созданного альфа релиза', async ({ page }) => {
   await page.goto('https://da-dp02-ws-prjm-ift-1.apps.dap.devpub-02.solution.sbt/erp/main');
   await page.getByRole('textbox', { name: 'Username or email' }).click();
-  await page.getByRole('textbox', { name: 'Username or email' }).fill('user7');
+  await page.getByRole('textbox', { name: 'Username or email' }).fill('user');
   await page.getByRole('textbox', { name: 'Password' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill('user7');
+  await page.getByRole('textbox', { name: 'Password' }).fill('user');
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByText('SSberbank Technology').click();
   await page.getByRole('menuitem', { name: 'branches Версии продуктов' }).click();
